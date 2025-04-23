@@ -5,6 +5,7 @@ services:
       dockerfile: dockerfile
     expose:
       - 5000
+      
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - VIRTUAL_HOST=krmndemo.online
