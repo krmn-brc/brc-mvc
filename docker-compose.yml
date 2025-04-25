@@ -1,16 +1,44 @@
 services:
-  api:
-    build:
-      context: .
-      dockerfile: dockerfile
-    ports:
-      - 5000:5000
+  # Nginx Proxy
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
     environment:
-      - ASPNETCORE_URLS=http://+:5000
+      - DEFAULT_HOST=krmndemo.online # Varsayılan domain adı
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro # Docker events'lerine erişim
+      - /etc/nginx/certs:/etc/nginx/certs:rw
+      - /etc/nginx/vhost.d:/etc/nginx/vhost.d:rw
+      - /usr/share/nginx/html:/usr/share/nginx/html:rw
+    networks:
+      - webproxy
+
+  # Let's Encrypt Nginx Proxy Companion
+  nginx-proxy-ssl:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-proxy-ssl
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Docker events'lerine erişim
+      - /etc/nginx/certs:/etc/nginx/certs:rw
+      - /etc/nginx/vhost.d:/etc/nginx/vhost.d:rw
+      - /usr/share/nginx/html:/usr/share/nginx/html:rw
+    networks:
+      - webproxy
+
+  # Uygulamanız (örneğin, MVC API uygulamanız)
+  brc-mvc-api:
+    image: brc-mvc-api # Uygulama imajınız
+    container_name: brc-mvc-api-1
+    environment:
       - VIRTUAL_HOST=krmndemo.online
+      - VIRTUAL_PORT=5000
       - LETSENCRYPT_HOST=krmndemo.online
       - LETSENCRYPT_EMAIL=krmn28aws@gmail.com
-    restart: always
     networks:
       - webproxy
 
