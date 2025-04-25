@@ -15,7 +15,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/out .
 
-EXPOSE 5000
 
 # Uygulamayı başlat
 ENTRYPOINT ["dotnet", "brc-mvc.dll"]
